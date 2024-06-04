@@ -15,6 +15,8 @@ import com.dantsu.escposprinter.exceptions.EscPosParserException;
 
 import java.lang.ref.WeakReference;
 
+import com.dantsu.thermalprinter.EsitoStampa;
+
 public abstract class AsyncEscPosPrint extends AsyncTask<AsyncEscPosPrinter, Integer, AsyncEscPosPrint.PrinterStatus> {
     public final static int FINISH_SUCCESS = 1;
     public final static int FINISH_NO_PRINTER = 2;
@@ -31,6 +33,8 @@ public abstract class AsyncEscPosPrint extends AsyncTask<AsyncEscPosPrinter, Int
     protected ProgressDialog dialog;
     protected WeakReference<Context> weakContext;
     protected OnPrintFinished onPrintFinished;
+
+
 
 
     public AsyncEscPosPrint(Context context) {
@@ -151,12 +155,15 @@ public abstract class AsyncEscPosPrint extends AsyncTask<AsyncEscPosPrinter, Int
                         .setTitle("Success")
                         .setMessage("Congratulation ! The texts are printed !")
                         .show();
+
+                EsitoStampa.setEsito(true);
                 break;
             case AsyncEscPosPrint.FINISH_NO_PRINTER:
                 new AlertDialog.Builder(context)
                         .setTitle("No printer")
                         .setMessage("The application can't find any printer connected.")
                         .show();
+                EsitoStampa.setEsito(false);
                 break;
             case AsyncEscPosPrint.FINISH_PRINTER_DISCONNECTED:
                 new AlertDialog.Builder(context)
