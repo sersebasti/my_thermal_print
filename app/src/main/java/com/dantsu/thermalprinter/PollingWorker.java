@@ -29,6 +29,7 @@ import java.util.Locale;
 import java.util.concurrent.CountDownLatch;
 
 import com.dantsu.thermalprinter.EsitoStampa;
+import com.dantsu.thermalprinter.async.DataBridge;
 
 @RequiresApi(api = Build.VERSION_CODES.O)
 public class PollingWorker extends Worker {
@@ -38,6 +39,8 @@ public class PollingWorker extends Worker {
     private static String Data;
 
     private static final String ACTION_PRINT_BLUETOOTH = "com.example.ACTION_PRINT_BLUETOOTH";
+
+    private static final String ACTION_PRINT_USB = "com.example.ACTION_PRINT_USB";
 
     private static final String TAG = "PollingWorker";
 
@@ -120,13 +123,16 @@ public class PollingWorker extends Worker {
 
                         Data  = prepareTextToPrint(item);
                         Log.d("log_stampa", "Da stampare: " + Data);
-                        updateBluetoothData(Data);
+                        //updateBluetoothData(Data);
+                        DataBridge.setData(Data);
 
-                        boolean ripeti = true;
-                        while(ripeti){
+                        int ripeti = 0;
+                        while(ripeti < 2){
 
                             // Trigger printing by sending a broadcast to MainActivity
-                            Intent intent = new Intent(ACTION_PRINT_BLUETOOTH);
+                            //Intent intent = new Intent(ACTION_PRINT_BLUETOOTH);
+                            Intent intent = new Intent(ACTION_PRINT_USB);
+
                             getApplicationContext().sendBroadcast(intent);
 
                             if(EsitoStampa.getEsito()){
@@ -138,8 +144,9 @@ public class PollingWorker extends Worker {
 
                             Thread.sleep(4000);
 
-                            ripeti = !EsitoStampa.getEsito();
+                            if(EsitoStampa.getEsito()){break;}
 
+                            ripeti++;
                         }
 
 

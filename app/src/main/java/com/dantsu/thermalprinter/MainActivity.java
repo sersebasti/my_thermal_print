@@ -46,6 +46,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
 
+import com.dantsu.thermalprinter.async.DataBridge;
+
+
 import android.os.Bundle;
 import android.util.Log;
 import androidx.appcompat.app.AppCompatActivity;
@@ -56,7 +59,7 @@ import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
 
-
+    private static final String ACTION_PRINT_USB = "com.example.ACTION_PRINT_USB";
     private static final String ACTION_PRINT_BLUETOOTH = "com.example.ACTION_PRINT_BLUETOOTH";
 
     private final BroadcastReceiver printReceiver = new BroadcastReceiver() {
@@ -68,6 +71,19 @@ public class MainActivity extends AppCompatActivity {
                 String bluetoothData = PollingWorker.getBluetoothData();
                 System.out.println(bluetoothData);
                 printBluetooth(bluetoothData);
+            }
+        }
+    };
+
+    private final BroadcastReceiver printReceiverUSB = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (ACTION_PRINT_USB.equals(intent.getAction())) {
+
+                // Access and print the Bluetooth data
+                //String USBData = PollingWorker.getBluetoothData();
+                //System.out.println(USBData);
+                printUsb();
             }
         }
     };
@@ -93,6 +109,11 @@ public class MainActivity extends AppCompatActivity {
         // Register the broadcast receiver
         IntentFilter filter = new IntentFilter(ACTION_PRINT_BLUETOOTH);
         registerReceiver(printReceiver, filter);
+
+
+        // Register the broadcast receiver USB
+        IntentFilter filterUSB = new IntentFilter(ACTION_PRINT_USB);
+        registerReceiver(printReceiverUSB, filterUSB);
 
         UTCDate_handler = new UtcDateTimeHandler();
         UTCDate_handler.setNowAsUtc();
@@ -363,8 +384,18 @@ public class MainActivity extends AppCompatActivity {
             return printer.addTextToPrint(textToPrint); // Include the text to be printed if it's not null
         }
 
-        return printer.addTextToPrint(
+        String dataToPrint = DataBridge.getData();
+
+        return printer.addTextToPrint(dataToPrint
+
+        );
+    }
+}
+
+
+                /*
                 "[C]<img>" + PrinterTextParserImg.bitmapToHexadecimalString(printer, this.getApplicationContext().getResources().getDrawableForDensity(R.drawable.logo, DisplayMetrics.DENSITY_MEDIUM)) + "</img>\n" +
+
                         "[L]\n" +
                         "[C]<u><font size='big'>ORDER N°045</font></u>\n" +
                         "[L]\n" +
@@ -392,7 +423,4 @@ public class MainActivity extends AppCompatActivity {
                         "\n" +
                         "[C]<barcode type='ean13' height='10'>831254784551</barcode>\n" +
                         "[L]\n" +
-                        "[C]<qrcode size='20'>https://dantsu.com/</qrcode>\n"
-        );
-    }
-}
+                        "[C]<qrcode size='20'>https://dantsu.com/</qrcode>\n" /**/
