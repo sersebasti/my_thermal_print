@@ -155,7 +155,6 @@ public abstract class AsyncEscPosPrint extends AsyncTask<AsyncEscPosPrinter, Int
                         .setTitle("Success")
                         .setMessage("Congratulation ! The texts are printed !")
                         .show();
-
                 EsitoStampa.setEsito(true);
                 break;
             case AsyncEscPosPrint.FINISH_NO_PRINTER:
@@ -163,7 +162,6 @@ public abstract class AsyncEscPosPrint extends AsyncTask<AsyncEscPosPrinter, Int
                         .setTitle("No printer")
                         .setMessage("The application can't find any printer connected.")
                         .show();
-                EsitoStampa.setEsito(false);
                 break;
             case AsyncEscPosPrint.FINISH_PRINTER_DISCONNECTED:
                 new AlertDialog.Builder(context)

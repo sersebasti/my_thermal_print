@@ -79,10 +79,6 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (ACTION_PRINT_USB.equals(intent.getAction())) {
-
-                // Access and print the Bluetooth data
-                //String USBData = PollingWorker.getBluetoothData();
-                //System.out.println(USBData);
                 printUsb();
             }
         }
@@ -380,15 +376,17 @@ public class MainActivity extends AppCompatActivity {
         SimpleDateFormat format = new SimpleDateFormat("'on' yyyy-MM-dd 'at' HH:mm:ss");
         AsyncEscPosPrinter printer = new AsyncEscPosPrinter(printerConnection, 203, 48f, 32);
 
-        if (textToPrint != null) {
-            return printer.addTextToPrint(textToPrint); // Include the text to be printed if it's not null
+        String ToPrint = DataBridge.getData();
+        if(ToPrint != null && ToPrint.length() > 0){
+            return printer.addTextToPrint(ToPrint);
+        }
+        else{
+            return printer.addTextToPrint("[L]\n" + "Test\n");
         }
 
-        String dataToPrint = DataBridge.getData();
+        //return printer.addTextToPrint(DataBridge.getData());
 
-        return printer.addTextToPrint(dataToPrint
 
-        );
     }
 }
 
