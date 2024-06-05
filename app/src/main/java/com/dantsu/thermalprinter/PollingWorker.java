@@ -121,47 +121,19 @@ public class PollingWorker extends Worker {
 
                     for (ApiResponseItem item : recentItems) {
 
-                        Data  = prepareTextToPrint(item);
-                        Log.d("log_stampa", "Da stampare: " + Data);
-                        //updateBluetoothData(Data);
-                        DataBridge.setData(Data);
+                        DataBridge.setData(prepareTextToPrint(item));
+                        //DataBridge.setData("Ramdom data to check");
 
-                        int ripeti = 0;
-                        while(ripeti < 2){
+                        Intent intent = new Intent(ACTION_PRINT_USB);
+                        getApplicationContext().sendBroadcast(intent);
 
-                            // Trigger printing by sending a broadcast to MainActivity
-                            //Intent intent = new Intent(ACTION_PRINT_BLUETOOTH);
-                            Intent intent = new Intent(ACTION_PRINT_USB);
-
-                            getApplicationContext().sendBroadcast(intent);
-
-                            if(EsitoStampa.getEsito()){
-                                Log.d("log_stampa", "esito ok");
-                            }
-                            else{
-                                Log.d("log_stampa", "esito ko");
-                            }
-
+                        boolean esitoStampa = false;
+                        while(!esitoStampa){
+                            esitoStampa = EsitoStampa.getEsito();
                             Thread.sleep(4000);
-
-                            if(EsitoStampa.getEsito()){break;}
-
-                            ripeti++;
                         }
-
-
-                        /*
-                        Data  = "Fake print to reset connection";
-                        Log.d(TAG, "Da stampare: " + Data);
-                        updateBluetoothData(Data);
-
-                        // Trigger printing by sending a broadcast to MainActivity
-                        Intent fake_intent = new Intent(ACTION_PRINT_BLUETOOTH);
-                        getApplicationContext().sendBroadcast(fake_intent);
-
                         Thread.sleep(1000);
-                        //Thread.sleep(3000);
-                        */
+
                     }
 
 
@@ -241,11 +213,11 @@ public class PollingWorker extends Worker {
 
     public String prepareTextToPrint(ApiResponseItem item){
 
-        String originalString = item.getCommanda__product__title();
-        String wordToRemove = "Pizza";
+        //String originalString = item.getCommanda__product__title();
+        //String wordToRemove = "Pizza";
 
         // Use regular expression to remove the word
-        String result_product__title = originalString.replaceAll("\\b" + wordToRemove + "\\b", "").trim();
+        //String result_product__title = originalString.replaceAll("\\b" + wordToRemove + "\\b", "").trim();
 
         String noteLine = "";
         if (item.getCommanda__note() != null && item.getCommanda__note().length() > 0) {
@@ -254,7 +226,7 @@ public class PollingWorker extends Worker {
 
         return  "\n" + "\n" +
                 "\n[L]<font size='big'>Tav: " + item.getNome() + "</font>" +
-                "\n[L]<font size='big'>" + result_product__title + "</font>" +
+                "\n[L]<font size='big'>" + item.getCommanda__product__title() + "</font>" +
                 "\n[L]<font size='big'>Num: " + item.getCommanda__quantity() + "</font>" +
                 noteLine +
                 "\n" + "\n";
