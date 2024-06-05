@@ -34,6 +34,7 @@ import com.dantsu.thermalprinter.async.DataBridge;
 @RequiresApi(api = Build.VERSION_CODES.O)
 public class PollingWorker extends Worker {
 
+    private boolean esitoStampa = false;
     private static String bluetoothData;
 
     private static String Data;
@@ -71,6 +72,7 @@ public class PollingWorker extends Worker {
 
     // Method to make API request (implement your actual API call here)
     private void makeApiRequest() {
+        DataBridge.setData("");
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://sersebasti.ddns.net/")
                 .addConverterFactory(GsonConverterFactory.create())
@@ -127,11 +129,12 @@ public class PollingWorker extends Worker {
                         Intent intent = new Intent(ACTION_PRINT_USB);
                         getApplicationContext().sendBroadcast(intent);
 
-                        boolean esitoStampa = false;
                         while(!esitoStampa){
                             esitoStampa = EsitoStampa.getEsito();
                             Thread.sleep(4000);
                         }
+                        esitoStampa = false;
+
                         Thread.sleep(1000);
 
                     }
@@ -221,15 +224,33 @@ public class PollingWorker extends Worker {
 
         String noteLine = "";
         if (item.getCommanda__note() != null && item.getCommanda__note().length() > 0) {
-            noteLine = "\n[L]<font size='big'>Note: " + item.getCommanda__note() + "</font>";
+            noteLine = "\n[L]<u><font size='big'>Note: " + item.getCommanda__note() + "</font></u>";
         }
 
-        return  "\n" + "\n" +
-                "\n[L]<font size='big'>Tav: " + item.getNome() + "</font>" +
-                "\n[L]<font size='big'>" + item.getCommanda__product__title() + "</font>" +
-                "\n[L]<font size='big'>Num: " + item.getCommanda__quantity() + "</font>" +
+        // "\n[L]<font size='big'>Tav: " + removeSpecialChars(item.getNome()) + "</font>" +
+
+        String restult = "[L]\n" + "[L]\n" +
+
+                "\n[L]<u><font size='big'>Tav: " + item.getNome() + "</font></u>" +
+                "\n[L]<u><font size='big'>" + item.getCommanda__product__title() + "</font></u>" +
+                "\n[L]<u><font size='big'>Num: " + item.getCommanda__quantity() + "</font></u>" +
                 noteLine +
                 "\n" + "\n";
+
+        return  restult;
+    }
+
+    public static String removeSpecialChars(String input) {
+        // Regular expression to match special characters
+        String regex = "[^a-zA-Z0-9\\s]";
+
+        // Replace special characters with spaces
+        String result = input.replaceAll(regex, " ");
+
+        // Remove extra spaces
+        result = result.replaceAll("\\s+", " ");
+
+        return result;
     }
 
     public String getMaxProductionDateTime(List<ApiResponseItem> recentProductionItems) {

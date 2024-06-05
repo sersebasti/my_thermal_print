@@ -155,6 +155,7 @@ public abstract class AsyncEscPosPrint extends AsyncTask<AsyncEscPosPrinter, Int
                         .setTitle("Success")
                         .setMessage("Congratulation ! The texts are printed !")
                         .show();
+                DataBridge.setData("");
                 EsitoStampa.setEsito(true);
                 break;
             case AsyncEscPosPrint.FINISH_NO_PRINTER:
