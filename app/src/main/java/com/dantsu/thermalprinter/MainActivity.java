@@ -19,6 +19,7 @@ import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 
@@ -102,6 +103,8 @@ public class MainActivity extends AppCompatActivity {
         button = (Button) this.findViewById(R.id.button_tcp);
         button.setOnClickListener(view -> printTcp());
 
+
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         // Register the broadcast receiver
         IntentFilter filter = new IntentFilter(ACTION_PRINT_BLUETOOTH);
         registerReceiver(printReceiver, filter);
@@ -116,6 +119,8 @@ public class MainActivity extends AppCompatActivity {
 
         // Schedule the polling work
         schedulePollingWork();
+
+
 
     }
 
