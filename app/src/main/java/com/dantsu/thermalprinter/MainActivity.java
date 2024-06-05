@@ -94,6 +94,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Start the foreground service
+        Intent serviceIntent = new Intent(this, MyForegroundService.class);
+        startForegroundService(serviceIntent);
+
+
         Button button = (Button) this.findViewById(R.id.button_bluetooth_browse);
         button.setOnClickListener(view -> browseBluetoothDevice());
         button = (Button) findViewById(R.id.button_bluetooth);
