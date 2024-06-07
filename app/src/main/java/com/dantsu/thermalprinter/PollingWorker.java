@@ -12,6 +12,7 @@ import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import retrofit2.Call;
@@ -26,6 +27,7 @@ import android.view.View;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
 import com.dantsu.thermalprinter.EsitoStampa;
@@ -121,9 +123,33 @@ public class PollingWorker extends Worker {
                     }
                     /**/
 
-                    for (ApiResponseItem item : recentItems) {
 
-                        DataBridge.setData(prepareTextToPrint(item));
+                        Map<Integer, List<ApiResponseItem>> resultMap = splitListByTavoloId(recentItems);
+
+                        // Now resultMap contains lists of ApiResponseItem objects grouped by commanda__id
+                        for (Map.Entry<Integer, List<ApiResponseItem>> entry : resultMap.entrySet()) {
+                            int commandaId = entry.getKey();
+                            List<ApiResponseItem> subList = entry.getValue();
+
+                            DataBridge.setData(prepareTextToPrint(subList));
+                            //DataBridge.setData("Ramdom data to check");
+
+                            Intent intent = new Intent(ACTION_PRINT_USB);
+                            getApplicationContext().sendBroadcast(intent);
+
+                            while(!esitoStampa){
+                                esitoStampa = EsitoStampa.getEsito();
+                                Thread.sleep(4000);
+                            }
+                            esitoStampa = false;
+
+                            Thread.sleep(1000);
+
+                        }
+
+
+
+
                         //DataBridge.setData("Ramdom data to check");
 
                         Intent intent = new Intent(ACTION_PRINT_USB);
@@ -137,7 +163,7 @@ public class PollingWorker extends Worker {
 
                         Thread.sleep(1000);
 
-                    }
+
 
 
 
@@ -214,28 +240,44 @@ public class PollingWorker extends Worker {
         return recentProductionItems;
     }
 
-    public String prepareTextToPrint(ApiResponseItem item){
+    public String prepareTextToPrint(List<ApiResponseItem> sublist){
 
         //String originalString = item.getCommanda__product__title();
         //String wordToRemove = "Pizza";
 
+
         // Use regular expression to remove the word
         //String result_product__title = originalString.replaceAll("\\b" + wordToRemove + "\\b", "").trim();
+        int Commanda_ID = sublist.get(0).getCommanda__id();
+        String Tavolo = sublist.get(0).getNome();
+
 
         String noteLine = "";
-        if (item.getCommanda__note() != null && item.getCommanda__note().length() > 0) {
-            noteLine = "\n[L]<u><font size='big'>Note: " + item.getCommanda__note() + "</font></u>";
-        }
+
+
+
 
         // "\n[L]<font size='big'>Tav: " + removeSpecialChars(item.getNome()) + "</font>" +
 
         String restult = "[L]\n" + "[L]\n" +
 
-                "\n[L]<u><font size='big'>Tav: " + item.getNome() + "</font></u>" +
-                "\n[L]<u><font size='big'>" + item.getCommanda__product__title() + "</font></u>" +
-                "\n[L]<u><font size='big'>Num: " + item.getCommanda__quantity() + "</font></u>" +
-                noteLine +
-                "\n" + "\n";
+                "\n[L]<u><font size='big'>Tavolo: " + Tavolo + "</font></u>" + "[L]\n";
+                //"\n[L]<u><font size='big'>" + item.getCommanda__quantity() + "x: " + item.getCommanda__product__title() + "</font></u>" +
+                //noteLine +
+
+
+        for (ApiResponseItem item : sublist) {
+
+            restult += "\n" + "[L]<u><font size='big'>" + item.getCommanda__quantity() + "x: " + item.getCommanda__product__title() + "</font></u>" + "[L]\n";
+
+            if (item.getCommanda__note() != null && item.getCommanda__note().length() > 0) {
+                restult += "\n[L]<u><font size='big'>Note: " + item.getCommanda__note() + "</font></u>" + "[L]\n";
+            }
+
+        }
+
+        restult += "[L]\n" + "[L]\n";
+
 
         return  restult;
     }
@@ -291,6 +333,19 @@ public class PollingWorker extends Worker {
                 //"\nProduct Collection ID: " + item.getCommanda__product__collection_id() +
                 //"\nProduct Tipo Prodotto ID: " + item.getCommanda__product__tipo_prodotto_id()
 
+    }
+
+    public Map<Integer, List<ApiResponseItem>> splitListByTavoloId(List<ApiResponseItem> itemList) {
+        Map<Integer, List<ApiResponseItem>> resultMap = new HashMap<>();
+
+        for (ApiResponseItem item : itemList) {
+            int TavoloId = item.getId();
+            List<ApiResponseItem> subList = resultMap.getOrDefault(TavoloId, new ArrayList<>());
+            subList.add(item);
+            resultMap.put(TavoloId, subList);
+        }
+
+        return resultMap;
     }
 
 

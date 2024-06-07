@@ -148,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
                 OneTimeWorkRequest pollingWorkRequest = new OneTimeWorkRequest.Builder(PollingWorker.class)
                         .build();
                 WorkManager.getInstance(MainActivity.this).enqueue(pollingWorkRequest);
-                handler.postDelayed(this, 2000); // Schedule the task to run again after 5 seconds
+                handler.postDelayed(this, 5000); // Schedule the task to run again after 5 seconds
             }
         };
         handler.post(pollingTask);
